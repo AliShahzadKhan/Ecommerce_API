@@ -47,4 +47,37 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.get('/:id', async (req, res) => {
+    const category = await Category.findById(req.params.id);
+    if(!category) {
+        res.status(404).json({
+            success: false,
+            message: 'Category does not exist'
+        });
+    }
+    res.status(200).send(category);
+});
+
+router.put('/:id', async (req, res) => {
+    const category = await Category.findByIdAndUpdate(
+        req.params.id,
+        {
+            name: req.body.name,
+            icon: req.body.icon,
+            color: req.body.color
+        },
+
+        {new: true}
+        
+    );
+
+    if(!category) {
+        return res.status(404).json({
+            success: false,
+            message: 'Category does not exist!'
+        });
+    }
+    return res.status(200).send(category);
+});
+
 module.exports = router;
