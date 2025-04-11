@@ -78,8 +78,21 @@ router.put('/:id', async (req, res) => {
 });
 
 router.get(`/`, async (req, res) => {
-    const productList = await Product.find().select('name image -_id');
-    res.send(productList);
+    let filter = {};
+    if (req.query.categories) {
+        filter = {category: req.query.categories.split(',')};
+    }
+    const productList = await Product.find(filter).populate('category');
+    if (!productList) {
+        return res.status(500).json({
+            success: false,
+            message: 'Internal server error!'
+        });
+    } else {
+        return res.status(200).json({
+            productList
+        });
+    }
 });
 
 router.get('/:id', async (req, res) => {
@@ -91,6 +104,33 @@ router.get('/:id', async (req, res) => {
         });
     }
     return res.status(200).send(product);
+});
+
+router.get('/get/count', async (req, res) => {
+    const productCount = await Product.countDocuments();
+    if(!productCount) {
+        return res.status(500).json({
+            success: false,
+            message: 'Interal server error!'
+        });
+    }
+    return res.status(200).json({
+        success: true,
+        productCount: productCount
+    });
+});
+
+router.get('/get/featured', async (req, res) => {
+    const products = await Product.find({
+        isFeatured: true
+    });
+    if(!products) {
+        return res.status(500).json({
+            success: false,
+            message: 'Interal server error!'
+        });
+    }
+    return res.status(200).json(products);
 });
 
 router.delete('/:id', async (req, res) => {
