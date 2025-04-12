@@ -8,6 +8,8 @@ const productsRouter = require('./routers/products');
 const categoriesRouter = require('./routers/categories');
 const userRouter = require('./routers/users');
 const orderRouter = require('./routers/orders');
+const verifyToken = require('./utils/jwt');
+const errorHandler = require('./utils/error-handler');
 require('dotenv').config();
 
 app.use(cors());
@@ -16,6 +18,9 @@ app.use(cors());
 //middleware
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
+app.use(verifyToken());
+app.use(errorHandler);
+
 
 //routes
 app.use(`${process.env.API_URL}/products`, productsRouter);

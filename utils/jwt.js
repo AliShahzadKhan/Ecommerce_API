@@ -1,0 +1,24 @@
+const { expressjwt: expressJwt } = require('express-jwt');
+
+
+function verifyToken() {
+    return expressJwt({
+        secret: process.env.JWT_SECRET,
+        algorithms: ['HS256']
+    }).unless({
+        path: [
+            {
+                url: /\/api\/v1\/products(.*)/,
+                methods: ['GET', 'OPTIONS']
+            },
+            {
+                url: /\/api\/v1\/categories(.*)/,
+                methods: ['GET', 'OPTIONS']
+            },
+            `${process.env.API_URL}/users/login`,
+            `${process.env.API_URL}/users/signup`
+        ]
+    })
+}
+
+module.exports = verifyToken;
