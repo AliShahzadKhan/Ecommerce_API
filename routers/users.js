@@ -117,4 +117,26 @@ router.get('/:id', async (req, res) => {
     res.status(200).send(user);
 });
 
+router.get('/get/count', (req, res) => {
+    const userCount = User.countDocuments((count)=>count);
+    if(!userCount) {
+        res.status(500).json('users not found');
+    }
+    res.status(200).send(userCount);
+});
+
+router.delete('/:id', async (req, res) => {
+    const user = await User.findByIdAndDelete(req.params.id) 
+    if(!user) {
+        res.status(500).json({
+            success: false,
+            message: 'Invalid id provided/User does not exist'
+        });
+    }
+    res.status(200).json({
+        success: true,
+        message: 'User deleted successfully!'
+    });
+});
+
 module.exports = router;

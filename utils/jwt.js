@@ -4,7 +4,8 @@ const { expressjwt: expressJwt } = require('express-jwt');
 function verifyToken() {
     return expressJwt({
         secret: process.env.JWT_SECRET,
-        algorithms: ['HS256']
+        algorithms: ['HS256'],
+        isRevoked: isRevoked
     }).unless({
         path: [
             {
@@ -19,6 +20,11 @@ function verifyToken() {
             `${process.env.API_URL}/users/signup`
         ]
     })
+}
+
+async function isRevoked(req, jwt) {
+    const payload = jwt.payload
+    return !payload.isAdmin
 }
 
 module.exports = verifyToken;

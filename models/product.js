@@ -59,7 +59,12 @@ const productScehma = mongoose.Schema({
     }
 });
 
-
+// productScehma.virtual('id').get(function() {
+//     return this._id.toHexString();
+// });
+// productScehma.set('toJSON', {
+//     virtuals: true
+// });
 
 const Product = mongoose.model('Product', productScehma);
 module.exports = Product;
