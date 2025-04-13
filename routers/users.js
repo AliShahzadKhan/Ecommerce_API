@@ -6,6 +6,7 @@ const router = express.Router();
 require('dotenv').config();
 
 router.post('/', async (req, res) => {
+    
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         let user = new User({
@@ -28,25 +29,34 @@ router.post('/', async (req, res) => {
             message: 'User created successfully!',
             user: user
         });
+        
     } catch (error) {
+
         res.status(500).json({
             success: false,
             message: error.message
         });
+
     }
+
 });
 
 router.post('/login', async (req, res) => {
+
     const user = await User.findOne({
         email: req.body.email
     });
+
     if(!user) {
         return res.status(400).send('User not found!');
     }
+
     const isMatch = await bcrypt.compare(req.body.password, user.passwordHash);
+
     if(!isMatch) {
         return res.status(400).send('Incorrect password!');
     }
+    
     const token = jwt.sign(
         {
             userId: user.id
@@ -55,14 +65,17 @@ router.post('/login', async (req, res) => {
         {
             expiresIn: '1d'
         }
-    )
+    );
+
     res.status(200).send({
         user: user.email,
         token: token
     });
+
 });
 
 router.post('/signup', async (req, res) => {
+
     try {
         const hashedPassword = await bcrypt.hash(req.body.password, 10);
         let user = new User({
@@ -85,21 +98,28 @@ router.post('/signup', async (req, res) => {
             message: 'User created successfully!',
             user: user
         });
+
     } catch (error) {
+
         res.status(500).json({
             success: false,
             message: error.message
         });
+
     }
+
 });
 
 router.get('/', async (req, res) => {
+
     const userList = await User.find().select('-passwordHash');
+
     if(!userList) {
         return res.status(404).json({
             success: false,
             message: 'No users found/Internal server error'
         });
+
     }
 
     res.status(200).send(userList);
@@ -107,36 +127,50 @@ router.get('/', async (req, res) => {
 });
 
 router.get('/:id', async (req, res) => {
+
     const user = await User.findById(req.params.id).select('-passwordHash');
+
     if(!user) {
         res.status(404).json({
             success: false,
             message: 'User does not exist/Internal server error!'
         });
     }
+
     res.status(200).send(user);
+
 });
 
 router.get('/get/count', (req, res) => {
+
     const userCount = User.countDocuments((count)=>count);
+
     if(!userCount) {
         res.status(500).json('users not found');
     }
+
     res.status(200).send(userCount);
+
 });
 
 router.delete('/:id', async (req, res) => {
-    const user = await User.findByIdAndDelete(req.params.id) 
+
+    const user = await User.findByIdAndDelete(req.params.id);
+
     if(!user) {
+
         res.status(500).json({
             success: false,
             message: 'Invalid id provided/User does not exist'
         });
+
     }
+
     res.status(200).json({
         success: true,
         message: 'User deleted successfully!'
     });
+    
 });
 
 module.exports = router;

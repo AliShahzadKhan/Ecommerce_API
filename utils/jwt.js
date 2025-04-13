@@ -2,11 +2,13 @@ const { expressjwt: expressJwt } = require('express-jwt');
 
 
 function verifyToken() {
+
     return expressJwt({
         secret: process.env.JWT_SECRET,
         algorithms: ['HS256'],
         isRevoked: isRevoked
-    }).unless({
+    })
+    .unless({
         path: [
             {
                 url: /\/api\/v1\/products(.*)/,
@@ -17,7 +19,8 @@ function verifyToken() {
                 methods: ['GET', 'OPTIONS']
             },
             `${process.env.API_URL}/users/login`,
-            `${process.env.API_URL}/users/signup`
+            `${process.env.API_URL}/users/signup`,
+            `${process.env.API_URL}/orders`
         ]
     })
 }

@@ -1,20 +1,50 @@
 const Order = require('../models/order');
 const express = require('express');
 const { OrderItem } = require('../models/orderItems');
+const { populate } = require('dotenv');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
-    const orderList = Order.find();
-
+    const orderList = await Order.find().populate('user', 'name').sort({'dateOrdered': -1});
     if(!orderList) {
         res.status(500).json({
-            success: false,
-            message: 'No orders active/found'
+           success: false,
+           message: error.message
         });
     }
+    
+    res.status(200).json({
+        success: true,
+        orderList
+    });
+});
+
+router.get('/:id', async (req, res) => {
+
+    const order = await Order.findById(req.params.id)
+    .populate('user', 'name')
+    .populate({
+        path: 'orderItems', populate: {
+            path: 'product', populate: 'category'
+        }
+    })
+
+    if(!order) {
+        res.status(404).json({
+            success: false,
+            message: 'Order not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        order
+    });
+
 });
 
 router.post('/', async (req, res) => {
+
     try {
         const orderItemIds = await Promise.all(
             req.body.orderItems.map(async orderItem => {
@@ -54,6 +84,7 @@ router.post('/', async (req, res) => {
             message: 'Order saved successfully!',
             order
         });
+        
     } catch (error) {
         res.status(500).json({
             success: false,

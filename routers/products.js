@@ -6,12 +6,15 @@ const mongoose = require('mongoose');
 
 
 router.post(`/`, async (req, res) => {
+    
     try {
     const category = await Category.findById(req.body.category);
+
     if(!category) {
         return res.status(400).send(
             'Invalid category provided!'
         );
+
     }
 
     let product = new Product({
@@ -34,28 +37,39 @@ router.post(`/`, async (req, res) => {
         return res.status(500).send(
             'The product cannot be save!'
         );
+
     }
+
     return res.status(200).send(
         'Product saved successfully!'
     );
+
 } catch (error) {
     res.send(error)
 }
+
 });
 
 router.put('/:id', async (req, res) => {
+
     if(!mongoose.isValidObjectId(req.params.id)) {
         return res.status(400).send('Invalid product id');
     }
+
     const category = await Category.findById(req.body.category);
+
     if(!category) {
+
         return res.status(400).send(
             'Invalid category provided!'
         );
+
     }
 
     const product = await Product.findByIdAndUpdate(
+
         req.params.id,
+
         {
         name: req.body.name,
         description: req.body.description,
@@ -69,30 +83,44 @@ router.put('/:id', async (req, res) => {
         numReviews: req.body.numReviews,
         isFeatured: req.body.isFeatured
         },
+
         {new: true}
+
     );
+
     if(!product) {
         return res.status(500).send('Product cannot be updated!')
     }
+
      res.status(200).send(product);
+
 });
 
 router.get(`/`, async (req, res) => {
+
     let filter = {};
+
     if (req.query.categories) {
         filter = {category: req.query.categories.split(',')};
     }
+
     const productList = await Product.find(filter).populate('category');
+
     if (!productList) {
+
         return res.status(500).json({
             success: false,
             message: 'Internal server error!'
         });
+
     } else {
+
         return res.status(200).json({
             productList
         });
+
     }
+    
 });
 
 router.get('/:id', async (req, res) => {
