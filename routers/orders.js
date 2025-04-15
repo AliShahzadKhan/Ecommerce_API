@@ -57,6 +57,16 @@ router.post('/', async (req, res) => {
             })
         );
 
+        const orderItemsResolved = await orderItemIds;
+        const totalPrices = await Promise.all(orderItemsResolved.map(async orderItemIds => {
+            const orderItem = await OrderItem.findById(orderItemIds).populate('product', 'price');
+            const totalPrice = orderItem.product.price * orderItem.quantity;
+            return totalPrice;
+        }));
+
+        //to get the total price of the order from the database instead of the front end
+        const totalPrice = totalPrices.reduce((acc, val) => acc + val, 0);
+
         let order = new Order({
             orderItems: orderItemIds, 
             shippingAddress1: req.body.shippingAddress1,
@@ -66,7 +76,7 @@ router.post('/', async (req, res) => {
             country: req.body.country,
             phone: req.body.phone,
             status: req.body.status,
-            totalPrice: req.body.totalPrice,
+            totalPrice: totalPrice,
             user: req.body.user
         });
 
@@ -84,7 +94,7 @@ router.post('/', async (req, res) => {
             message: 'Order saved successfully!',
             order
         });
-        
+
     } catch (error) {
         res.status(500).json({
             success: false,
@@ -93,5 +103,49 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.put('/:id', async (req, res) => {
+
+    const order = await Order.findByIdAndUpdate(
+
+        req.params.id,
+        {
+            status: req.body.status
+        },
+        {new: true}
+
+    )
+
+    if(!order) {
+        res.status(500).json({
+            success: false,
+            message: 'Order not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Order update success!',
+        order
+    });
+
+});
+
+router.delete('/:id', async (req, res) => {
+
+    const order = await Order.findByIdAndDelete(req.params.id);
+
+    if(!order) {
+        res.status(500).json({
+            success: false,
+            message: 'Order not found/Internal server error'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        message: 'Order deleted successfully!'
+    });
+
+});
 
 module.exports = router;
