@@ -19,6 +19,69 @@ router.get('/', async (req, res) => {
     });
 });
 
+router.get('/get/totalsales', async (req, res) => {
+    const totalSales = await Order.aggregate([
+        {
+            $group: {
+                _id: null,
+                totalSales : {
+                    $sum : '$totalPrice'
+                }
+            }
+        }
+    ]);
+
+    if(!totalSales) {
+        return res.status(400).send('The order sales cannot be generated');
+    }
+
+    res.send({
+        totalSales: totalSales.pop().totalSales
+    });
+
+});
+
+router.get('/get/count', async (req, res) => {
+    const orderCount = await Order.countDocuments((count) => count);
+
+    if(!orderCount) {
+        return res.status(500).json({
+            success: false,
+            message: 'Orders not found'
+        });
+    }
+
+    res.status(200).json({
+        success: true,
+        orderCount
+    });
+
+});
+
+router.get('/get/userorders/:userid', async (req, res) => {
+    const userOrderList = await Order.find({
+        user: req.params.userid
+    }).populate({
+        path: 'orderItems', populate: {
+            path: 'product', populate: 'category'
+        }
+    }).sort({
+        'dateOrderd': -1
+    });
+
+    if(!userOrderList) {
+        res.status(500).json({
+            success: false
+        });
+    }
+    
+    res.status(200).json({
+        success: true,
+        userOrderList
+    });
+
+});
+
 router.get('/:id', async (req, res) => {
 
     const order = await Order.findById(req.params.id)
@@ -58,6 +121,7 @@ router.post('/', async (req, res) => {
         );
 
         const orderItemsResolved = await orderItemIds;
+
         const totalPrices = await Promise.all(orderItemsResolved.map(async orderItemIds => {
             const orderItem = await OrderItem.findById(orderItemIds).populate('product', 'price');
             const totalPrice = orderItem.product.price * orderItem.quantity;
