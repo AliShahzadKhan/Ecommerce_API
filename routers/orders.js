@@ -1,7 +1,6 @@
 const Order = require('../models/order');
 const express = require('express');
 const { OrderItem } = require('../models/orderItems');
-const { populate } = require('dotenv');
 const router = express.Router();
 
 router.get('/', async (req, res) => {
@@ -59,14 +58,19 @@ router.get('/get/count', async (req, res) => {
 });
 
 router.get('/get/userorders/:userid', async (req, res) => {
+
     const userOrderList = await Order.find({
         user: req.params.userid
     }).populate({
+
         path: 'orderItems', populate: {
             path: 'product', populate: 'category'
         }
+
     }).sort({
+
         'dateOrderd': -1
+
     });
 
     if(!userOrderList) {
