@@ -3,6 +3,7 @@ const router = express.Router();
 const Product = require('../models/product');
 const Category = require('../models/category');
 const mongoose = require('mongoose');
+const multer = require('multer');
 
 
 router.post(`/`, async (req, res) => {
@@ -120,7 +121,7 @@ router.get(`/`, async (req, res) => {
         });
 
     }
-    
+
 });
 
 router.get('/:id', async (req, res) => {
