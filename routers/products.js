@@ -5,14 +5,26 @@ const Category = require('../models/category');
 const mongoose = require('mongoose');
 const multer = require('multer');
 
+const FILE_TYPE_MAP = {
+    'image/png' : 'png',
+    'image/jpeg' : 'png',
+    'image/jpg' : 'png',
+};
+
 const storage = multer.diskStorage({
 
     destination: function (req, file, cb) {
-      cb(null, 'public/uploads');
+        const isValid = FILE_TYPE_MAP[file.mimetype];
+        let uploadError = new Error('Invalid image type');
+        if(isValid){
+            uploadError = null;
+        }
+      cb(uploadError, 'public/uploads');
     },
 
     filename: function (req, file, cb) {
       const fileName = file.originalname.split(' ').join('-');
+      const extension = FILE_TYPE_MAP[file.mimetype];
       cb(null, fileName + '-' + Date.now())
     }
 
@@ -24,6 +36,7 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) => {
     
     try {
     const category = await Category.findById(req.body.category);
+    const file = req.file;
 
     if(!category) {
         return res.status(400).send(
@@ -32,8 +45,14 @@ router.post(`/`, uploadOptions.single('image'), async (req, res) => {
 
     }
 
+    if(!file) {
+        return res.status(400).send(
+            'No image in the request'
+        );
+    }
+
     const fileName = req.file.filename;
-    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`
+    const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
 
     let product = new Product({
         name: req.body.name,
@@ -111,6 +130,44 @@ router.put('/:id', async (req, res) => {
     }
 
      res.status(200).send(product);
+
+});
+
+router.put('/gallery-images/:id',
+     uploadOptions.array('images', 10), 
+     async (req, res) => {
+
+        if(!mongoose.isValidObjectId(req.params.id)) {
+            return res.status(400).send('Invalid product id');
+        }
+
+        const basePath = `${req.protocol}://${req.get('host')}/public/uploads/`;
+        
+        const files = req.files;
+        
+        if(files) {
+
+            files.map( file => {
+                imagesPaths.push(`${basePath}${file.fileName}`);
+            });
+
+        }
+
+        const product = await Product.findByIdAndUpdate(
+    
+            req.params.id,
+    
+            {
+            images: imagesPaths
+            },
+    
+            {new: true}
+    
+        );
+
+        if(!product) {
+            return res.status(500).send('The product cannot be updated!');
+        };
 
 });
 
