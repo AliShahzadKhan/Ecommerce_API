@@ -29,15 +29,19 @@ Nodemon for automatic server reloads during development
 
 Installation:
 //Clone the repository
+
 git clone https://github.com/your-username/ecommerce-api.git
 
 //Navigate into the project folder
+
 cd ecommerce-api
 
 //Install dependencies
+
 npm install
 
 //Run the server
+
 npm run dev
 
 
