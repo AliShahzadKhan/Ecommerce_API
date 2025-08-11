@@ -14,13 +14,13 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Step 2: Set up Node.js (optional for tests/linting)
+    # Step 2: Set up Node.js 
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
 
-    # Step 3: Install dependencies & run tests (optional)
+    # Step 3: Install dependencies & run tests
     - name: Install dependencies
       run: npm install
 

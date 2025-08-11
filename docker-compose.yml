@@ -7,7 +7,6 @@ services:
     ports:
       - "3000:3000"
     environment:
-      # For local container DB
       - MONGO_URI=mongodb://mongo:27017/ecommerce
       # Uncomment below if you want to test Atlas inside container
       # - MONGO_URI=mongodb+srv://username:password@cluster0.mongodb.net/ecommerce_api
