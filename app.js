@@ -18,7 +18,7 @@ app.use(cors());
 //middleware
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
-app.use(verifyToken());
+// app.use(verifyToken());
 app.use(errorHandler);
 app.use('/public/uploads', express.static(__dirname + '/public/uploads'));
 
@@ -28,10 +28,18 @@ app.use(`${process.env.API_URL}/products`, productsRouter);
 app.use(`${process.env.API_URL}/categories`, categoriesRouter);
 app.use(`${process.env.API_URL}/users`, userRouter);
 app.use(`${process.env.API_URL}/orders`, orderRouter);
+//debugging route
+app.get('/', (req, res) => {
+    res.send('welcome to my api');
+})
 
 
 //database connection
-mongoose.connect(process.env.MONGOOSE_CONNECTION_LINK)
+const mongo_URI = process.env.MONGO_URI || process.env.MONGOOSE_CONNECTION_LINK;
+mongoose.connect(mongo_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+})
 .then(()=>{
     console.log('Connection with mongoose success!');
 }).catch((error)=>{
